@@ -80,11 +80,11 @@ TreeSurname* InsertSurname(TreeSurname* node, string surname, int studentIndex)
 		node->left = nullptr;
 		node->right = nullptr;
 	}
-	else if (surname < node->surname)
+	else if (surname < node->surname)//Проверка меньше
 	{
 		node->left = InsertSurname(node->left, surname, studentIndex);
 	}
-	else if (surname >= node->surname)
+	else if (surname >= node->surname)//Проверка больще = для одинаковых данных
 	{
 		node->right = InsertSurname(node->right, surname, studentIndex);
 	}
@@ -101,11 +101,11 @@ TreeVisiting* InsertVisiting(TreeVisiting* node, int visiting, int studentIndex)
 		node->left = nullptr;
 		node->right = nullptr;
 	}
-	else if (visiting < node->visiting)
+	else if (visiting < node->visiting)//Проверка меньше
 	{
 		node->left = InsertVisiting(node->left, visiting, studentIndex);
 	}
-	else if (visiting >= node->visiting)
+	else if (visiting >= node->visiting)//Проверка больше = для одинаковых данных
 	{
 		node->right = InsertVisiting(node->right, visiting, studentIndex);
 	}
@@ -159,7 +159,7 @@ void PrintStudents(Student* students)//Вывод студентов из баз
 
 #pragma region Поиск
 
-Student FindStudentInBase(Student* students, int left, int right, int keyIndex)
+Student FindStudentInBase(Student* students, int left, int right, int keyIndex)//Бинарный поиск
 {
 	int mid = left + (right - left) / 2;
 	if (students[mid].id == keyIndex)
@@ -365,14 +365,14 @@ TreeSurname* DeleteStudentTree(TreeSurname* node, string keySurname, int keyID)
 	}
 	else
 	{
-		if (node->left == nullptr)
+		if (node->left == nullptr)//Первый случай
 		{
 			TreeSurname* temp = node->right;
 			delete node;
 			return temp;
 		}
 
-		else if (node->right == nullptr)
+		else if (node->right == nullptr)//Второй Случай
 		{
 			TreeSurname* temp = node->left;
 			delete node;
@@ -380,7 +380,7 @@ TreeSurname* DeleteStudentTree(TreeSurname* node, string keySurname, int keyID)
 		}
 		else
 		{
-			TreeSurname* temp = FindMin(node->right);
+			TreeSurname* temp = FindMin(node->right);//Третий Случай
 			node->surname = temp->surname;
 			node->studentIndex = temp->studentIndex;
 			node->right = DeleteStudentTree(node->right, temp->surname, temp->studentIndex);
@@ -410,14 +410,14 @@ TreeVisiting* DeleteStudentTree(TreeVisiting* node, int keyVisiting, int keyID)
 	}
 	else
 	{
-		if (node->left == nullptr)
+		if (node->left == nullptr)//Первый случай
 		{
 			TreeVisiting* temp = node->right;
 			delete node;
 			return temp;
 		}
 
-		else if (node->right == nullptr)
+		else if (node->right == nullptr)//Второй Случай
 		{
 			TreeVisiting* temp = node->left;
 			delete node;
@@ -425,7 +425,7 @@ TreeVisiting* DeleteStudentTree(TreeVisiting* node, int keyVisiting, int keyID)
 		}
 		else
 		{
-			TreeVisiting* temp = FindMin(node->right);
+			TreeVisiting* temp = FindMin(node->right);//Третий Случай
 			node->visiting = temp->visiting;
 			node->studentIndex = temp->studentIndex;
 			node->right = DeleteStudentTree(node->right, temp->visiting, temp->studentIndex);
