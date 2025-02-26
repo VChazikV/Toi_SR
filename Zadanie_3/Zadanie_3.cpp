@@ -72,7 +72,7 @@ void InsertStudentIncrease(ListStudents*& headSurnameIncrease, ListStudents*& he
 	newNode->visiting = visiting;
 	newNode->nextSurname = nullptr;
 	newNode->nextVisiting = nullptr;
-	if (!headSurnameIncrease || surname < headSurnameIncrease->surname)
+	if (!headSurnameIncrease || surname < headSurnameIncrease->surname)//Поверка корректности головы(существует или является началом при новом элементе)
 	{
 		newNode->nextSurname = headSurnameIncrease;
 		headSurnameIncrease = newNode;
@@ -80,7 +80,7 @@ void InsertStudentIncrease(ListStudents*& headSurnameIncrease, ListStudents*& he
 	else
 	{
 		ListStudents* current = headSurnameIncrease;
-		while (current->nextSurname && current->nextSurname->surname <= surname)
+		while (current->nextSurname && current->nextSurname->surname <= surname)//проверка текущего элемента(существует и находится ли в правильном месте при добавления нового элемента)
 		{
 			current = current->nextSurname;
 		}
@@ -88,7 +88,7 @@ void InsertStudentIncrease(ListStudents*& headSurnameIncrease, ListStudents*& he
 		current->nextSurname = newNode;
 	}
 
-	if (!headVisitingIncrease || visiting < headVisitingIncrease->visiting)
+	if (!headVisitingIncrease || visiting < headVisitingIncrease->visiting)//Поверка корректности головы(существует или является началом при новом элементе)
 	{
 		newNode->nextVisiting = headVisitingIncrease;
 		headVisitingIncrease = newNode;
@@ -96,7 +96,7 @@ void InsertStudentIncrease(ListStudents*& headSurnameIncrease, ListStudents*& he
 	else
 	{
 		ListStudents* current = headVisitingIncrease;
-		while (current->nextVisiting && current->nextVisiting->visiting <= visiting)
+		while (current->nextVisiting && current->nextVisiting->visiting <= visiting)//проверка текущего элемента(существует и находится ли в правильном месте при добавления нового элемента)
 		{
 			current = current->nextVisiting;
 		}
@@ -114,7 +114,7 @@ void BuildListStudentsIncrease(Student* studentsBase, unsigned int sizeBase, Lis
 	}
 }
 
-void InsertStudentDecrease(ListStudents*& headSurnameDecrease, ListStudents*& headVisitingDecrease, string surname, unsigned int id, unsigned int visiting)
+void InsertStudentDecrease(ListStudents*& headSurnameDecrease, ListStudents*& headVisitingDecrease, string surname, unsigned int id, unsigned int visiting)//Поверка корректности головы(существует или является началом при новом элементе)
 {
 	ListStudents* newNode = new ListStudents();
 	newNode->index = id;
@@ -122,7 +122,7 @@ void InsertStudentDecrease(ListStudents*& headSurnameDecrease, ListStudents*& he
 	newNode->visiting = visiting;
 	newNode->nextSurname = nullptr;
 	newNode->nextVisiting = nullptr;
-	if (!headSurnameDecrease || surname > headSurnameDecrease->surname)
+	if (!headSurnameDecrease || surname > headSurnameDecrease->surname)//Поверка корректности головы(существует или является началом при новом элементе)
 	{
 		newNode->nextSurname = headSurnameDecrease;
 		headSurnameDecrease = newNode;
@@ -130,7 +130,7 @@ void InsertStudentDecrease(ListStudents*& headSurnameDecrease, ListStudents*& he
 	else
 	{
 		ListStudents* current = headSurnameDecrease;
-		while (current->nextSurname && current->nextSurname->surname > surname)
+		while (current->nextSurname && current->nextSurname->surname > surname)//проверка текущего элемента(существует и находится ли в правильном месте при добавления нового элемента)
 		{
 			current = current->nextSurname;
 		}
@@ -138,7 +138,7 @@ void InsertStudentDecrease(ListStudents*& headSurnameDecrease, ListStudents*& he
 		current->nextSurname = newNode;
 	}
 
-	if (!headVisitingDecrease || visiting > headVisitingDecrease->visiting)
+	if (!headVisitingDecrease || visiting > headVisitingDecrease->visiting)//Поверка корректности головы(существует или является началом при новом элементе)
 	{
 		newNode->nextVisiting = headVisitingDecrease;
 		headVisitingDecrease = newNode;
@@ -146,7 +146,7 @@ void InsertStudentDecrease(ListStudents*& headSurnameDecrease, ListStudents*& he
 	else
 	{
 		ListStudents* current = headVisitingDecrease;
-		while (current->nextVisiting && current->nextVisiting->visiting > visiting)
+		while (current->nextVisiting && current->nextVisiting->visiting > visiting)//проверка текущего элемента(существует и находится ли в правильном месте при добавления нового элемента)
 		{
 			current = current->nextVisiting;
 		}
@@ -189,7 +189,7 @@ void PrintStudents(Student* students)//Вывод студентов из баз
 
 #pragma region Поиск
 
-Student FindStudentInBase(Student* students, int left, int right, int keyIndex)
+Student FindStudentInBase(Student* students, int left, int right, int keyIndex)//Рекурсивный поиск по ID в базовом массиве
 {
 	int mid = left + (right - left) / 2;
 	if (students[mid].id == keyIndex)
@@ -206,7 +206,7 @@ Student FindStudentInBase(Student* students, int left, int right, int keyIndex)
 	}
 };
 
-void SearchStudent(ListStudents* curentStudent, Student* students, string keySurnmae, bool& isFound)
+void SearchStudent(ListStudents* curentStudent, Student* students, string keySurnmae, bool& isFound)//Рекурсивный Поиск по фамилии студентов и вывод их
 {
 	if (curentStudent == nullptr)
 	{
@@ -221,7 +221,7 @@ void SearchStudent(ListStudents* curentStudent, Student* students, string keySur
 	SearchStudent(curentStudent->nextSurname, students, keySurnmae, isFound);
 }
 
-void SearchStudent(ListStudents* curentStudent, Student* students, int keyVisiting, bool& isFound)
+void SearchStudent(ListStudents* curentStudent, Student* students, int keyVisiting, bool& isFound)//Рекурсивный Поиск студентов и вывод их
 {
 	if (curentStudent == nullptr)
 	{
