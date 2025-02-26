@@ -5,6 +5,7 @@
 using namespace std;
 static unsigned int id_student = 1;
 static unsigned int sizeBase = 0;
+static unsigned int sizeBaseMax = 100;
 
 #pragma region Структуры
 // Структура для хранения информации об ученике
@@ -19,24 +20,19 @@ struct Student
 	unsigned int visiting;// Количество посещений
 };
 
-struct TreeSurname
+struct ListStudents
 {
 	string surname;// Фамилия
-	unsigned int studentIndex;// Индекс в массиве
-	TreeSurname* left;
-	TreeSurname* right;
-};
-
-struct TreeVisiting
-{
+	ListStudents* nextSurname;//След узел Фамилия
 	unsigned int visiting;// Посещения
-	unsigned int studentIndex; // Индекс в массиве
-	TreeVisiting* left;
-	TreeVisiting* right;
+	ListStudents* nextVisiting;//След узел Посещения
+	unsigned int index;// Id в базовом массиве
 };
 #pragma endregion
 
 #pragma region Заполнение Базового массива
+
+
 Student InputStudentFromClava()//Считывание Студентов с клавиатуры
 {
 	cout << "Данные " << id_student << "-ого студента" << endl;
@@ -65,74 +61,108 @@ void InputBaseStudentsFromClava(Student* students)
 	}
 }
 
-
-
 #pragma endregion
 
-#pragma region Вставка узла
-TreeSurname* InsertSurname(TreeSurname* node, string surname, int studentIndex)
+#pragma region Создание списка
+void InsertStudentIncrease(ListStudents*& headSurnameIncrease, ListStudents*& headVisitingIncrease, string surname, unsigned int id, unsigned int visiting)
 {
-	if (node == nullptr)
+	ListStudents* newNode = new ListStudents();
+	newNode->index = id;
+	newNode->surname = surname;
+	newNode->visiting = visiting;
+	newNode->nextSurname = nullptr;
+	newNode->nextVisiting = nullptr;
+	if (!headSurnameIncrease || surname < headSurnameIncrease->surname)
 	{
-		node = new TreeSurname();
-		node->studentIndex = studentIndex;
-		node->surname = surname;
-		node->left = nullptr;
-		node->right = nullptr;
+		newNode->nextSurname = headSurnameIncrease;
+		headSurnameIncrease = newNode;
 	}
-	else if (surname < node->surname)
+	else
 	{
-		node->left = InsertSurname(node->left, surname, studentIndex);
+		ListStudents* current = headSurnameIncrease;
+		while (current->nextSurname && current->nextSurname->surname <= surname)
+		{
+			current = current->nextSurname;
+		}
+		newNode->nextSurname = current->nextSurname;
+		current->nextSurname = newNode;
 	}
-	else if (surname >= node->surname)
+
+	if (!headVisitingIncrease || visiting < headVisitingIncrease->visiting)
 	{
-		node->right = InsertSurname(node->right, surname, studentIndex);
+		newNode->nextVisiting = headVisitingIncrease;
+		headVisitingIncrease = newNode;
 	}
-	return node;
+	else
+	{
+		ListStudents* current = headVisitingIncrease;
+		while (current->nextVisiting && current->nextVisiting->visiting <= visiting)
+		{
+			current = current->nextVisiting;
+		}
+		newNode->nextVisiting = current->nextVisiting;
+		current->nextVisiting = newNode;
+	}
+
 }
 
-TreeVisiting* InsertVisiting(TreeVisiting* node, int visiting, int studentIndex)
+void BuildListStudentsIncrease(Student* studentsBase, unsigned int sizeBase, ListStudents*& headSurnameIncrease, ListStudents*& headVisitingIncrease)
 {
-	if (node == nullptr)
+	for (unsigned int i = 0; i < sizeBase; i++)
 	{
-		node = new TreeVisiting();
-		node->studentIndex = studentIndex;
-		node->visiting = visiting;
-		node->left = nullptr;
-		node->right = nullptr;
+		InsertStudentIncrease(headSurnameIncrease, headVisitingIncrease, studentsBase[i].surname, studentsBase[i].id, studentsBase[i].visiting);
 	}
-	else if (visiting < node->visiting)
-	{
-		node->left = InsertVisiting(node->left, visiting, studentIndex);
-	}
-	else if (visiting >= node->visiting)
-	{
-		node->right = InsertVisiting(node->right, visiting, studentIndex);
-	}
-	return node;
-}
-#pragma endregion
-
-#pragma region  Создание деревьев
-TreeSurname* BuildTreeSurname(Student* students)
-{
-	TreeSurname* node = nullptr;
-	for (int i = 0; i < sizeBase; i++)
-	{
-		node = InsertSurname(node, students[i].surname, students[i].id);
-	}
-	return node;
 }
 
-TreeVisiting* BuildTreeVisiting(Student* students)
+void InsertStudentDecrease(ListStudents*& headSurnameDecrease, ListStudents*& headVisitingDecrease, string surname, unsigned int id, unsigned int visiting)
 {
-	TreeVisiting* node = nullptr;
-	for (int i = 0; i < sizeBase; i++)
+	ListStudents* newNode = new ListStudents();
+	newNode->index = id;
+	newNode->surname = surname;
+	newNode->visiting = visiting;
+	newNode->nextSurname = nullptr;
+	newNode->nextVisiting = nullptr;
+	if (!headSurnameDecrease || surname > headSurnameDecrease->surname)
 	{
-		node = InsertVisiting(node, students[i].visiting, students[i].id);
+		newNode->nextSurname = headSurnameDecrease;
+		headSurnameDecrease = newNode;
 	}
-	return node;
+	else
+	{
+		ListStudents* current = headSurnameDecrease;
+		while (current->nextSurname && current->nextSurname->surname > surname)
+		{
+			current = current->nextSurname;
+		}
+		newNode->nextSurname = current->nextSurname;
+		current->nextSurname = newNode;
+	}
+
+	if (!headVisitingDecrease || visiting > headVisitingDecrease->visiting)
+	{
+		newNode->nextVisiting = headVisitingDecrease;
+		headVisitingDecrease = newNode;
+	}
+	else
+	{
+		ListStudents* current = headVisitingDecrease;
+		while (current->nextVisiting && current->nextVisiting->visiting > visiting)
+		{
+			current = current->nextVisiting;
+		}
+		newNode->nextVisiting = current->nextVisiting;
+		current->nextVisiting = newNode;
+	}
 }
+
+void BuildListStudentsDecrease(Student* studentsBase, unsigned int sizeBase, ListStudents*& headSurnameDecrease, ListStudents*& headVisitingDecrease)
+{
+	for (unsigned int i = 0; i < sizeBase; i++)
+	{
+		InsertStudentDecrease(headSurnameDecrease, headVisitingDecrease, studentsBase[i].surname, studentsBase[i].id, studentsBase[i].visiting);
+	}
+}
+
 #pragma endregion
 
 #pragma region Базовый Вывод
@@ -176,265 +206,329 @@ Student FindStudentInBase(Student* students, int left, int right, int keyIndex)
 	}
 };
 
-void FindStudentIterative(TreeSurname* node, Student* students, string keySurname)
+void SearchStudent(ListStudents* curentStudent, Student* students, string keySurnmae, bool& isFound)
 {
-	bool isFind = false;
-	while (node != nullptr)
-	{
-		if (keySurname < node->surname)
-		{
-			node = node->left;
-		}
-		else if (keySurname > node->surname)
-		{
-			node = node->right;
-		}
-		else
-		{
-			PrintStudents(FindStudentInBase(students, 0, sizeBase, node->studentIndex));
-			isFind = true;
-			node = node->right;
-		}
-	}
-
-	if (!isFind)
-	{
-		cout << "Студенты с фамилией '" << keySurname << "' не найдены" << endl;
-	}
-}
-
-void FindStudentIterative(TreeVisiting* node, Student* students, int keyVisiting)
-{
-	bool isFind = false;
-	while (node != nullptr)
-	{
-		if (keyVisiting < node->visiting)
-		{
-			node = node->left;
-		}
-		else if (keyVisiting > node->visiting)
-		{
-			node = node->right;
-		}
-		else
-		{
-			PrintStudents(FindStudentInBase(students, 0, sizeBase, node->studentIndex));
-			isFind = true;
-			node = node->right;
-		}
-	}
-
-	if (!isFind)
-	{
-		cout << "Студенты с кол-вом посещений '" << keyVisiting << "' не найдены" << endl;
-	}
-}
-
-void SearchStudent(TreeSurname* node, Student* students, string keySurnmae, bool& isFound)
-{
-	if (node == nullptr)
+	if (curentStudent == nullptr)
 	{
 		return;
 	}
-	SearchStudent(node->left, students, keySurnmae, isFound);
-	if (node->surname == keySurnmae)
+	if (curentStudent->surname == keySurnmae)
 	{
-		PrintStudents(FindStudentInBase(students, 0, sizeBase, node->studentIndex));
+		Student student = FindStudentInBase(students, 0, sizeBase, curentStudent->index);
+		PrintStudents(student);
 		isFound = true;
 	}
-	SearchStudent(node->right, students, keySurnmae, isFound);
+	SearchStudent(curentStudent->nextSurname, students, keySurnmae, isFound);
 }
 
-void SearchStudent(TreeVisiting* node, Student* students, int keyVisiting, bool& isFound)
+void SearchStudent(ListStudents* curentStudent, Student* students, int keyVisiting, bool& isFound)
 {
-	if (node == nullptr)
+	if (curentStudent == nullptr)
 	{
 		return;
 	}
-	SearchStudent(node->left, students, keyVisiting, isFound);
-	if (node->visiting == keyVisiting)
+	if (curentStudent->visiting == keyVisiting)
 	{
-		PrintStudents(students[node->studentIndex - 1]);
+		Student student = FindStudentInBase(students, 0, sizeBase, curentStudent->index);
+		PrintStudents(student);
 		isFound = true;
 	}
-	SearchStudent(node->right, students, keyVisiting, isFound);
+	SearchStudent(curentStudent->nextVisiting, students, keyVisiting, isFound);
+}
+void IterativePrintFindStudents(ListStudents* head, Student* students, string keySurname)
+{
+	ListStudents* current = head;
+	bool found = false;
+	while (current != nullptr)
+	{
+		if (current->surname == keySurname)
+		{
+			found = true;
+			Student student = FindStudentInBase(students, 0, sizeBase, current->index);
+			PrintStudents(student);
+		}
+		current = current->nextSurname;
+	}
+	if (!found)
+	{
+		cout << "Студенты с фамилией " << keySurname << " не найдены." << endl;
+	}
 }
 
-TreeSurname* FindMin(TreeSurname* node)//Итерационный поиск
-{
-	while (node->left != nullptr)
-	{
-		node = node->left;
-	}
-	return node;
-}
 
-TreeVisiting* FindMin(TreeVisiting* node)//Итерационный поиск
+void IterativePrintFindStudents(ListStudents* head, Student* students, int keyVisiting)
 {
-	while (node->left != nullptr)
+	ListStudents* current = head;
+	bool found = false;
+	while (current != nullptr)
 	{
-		node = node->left;
+		if (current->visiting == keyVisiting)
+		{
+			found = true;
+			Student student = FindStudentInBase(students, 0, sizeBase, current->index);
+			PrintStudents(student);
+		}
+		current = current->nextVisiting;
 	}
-	return node;
+	if (!found)
+	{
+		cout << "Студенты с с кол-вом посещений " << keyVisiting << " не найдены." << endl;
+	}
 }
 #pragma endregion
 
 #pragma region Вывод информации
 
-void PrintStudentsSurnameA_Z(TreeSurname* node, Student* students)
+
+void PrintStudentsSurnameA_Z(ListStudents* headSurname, Student* students)
 {
-	if (node != nullptr)
+	ListStudents* currentStudent = headSurname;
+	while (currentStudent)
 	{
-		PrintStudentsSurnameA_Z(node->left, students);
-		PrintStudents(FindStudentInBase(students, 0, sizeBase, node->studentIndex));
-		PrintStudentsSurnameA_Z(node->right, students);
+		PrintStudents(FindStudentInBase(students, 0, sizeBase, currentStudent->index));
+		currentStudent = currentStudent->nextSurname;
 	}
 }
 
-void PrintStudentsSurnameZ_A(TreeSurname* node, Student* students)
+void PrintStudentsSurnameZ_A(ListStudents* headSurname, Student* students)
 {
-	if (node != nullptr)
+	ListStudents* currentStudent = headSurname;
+	while (currentStudent)
 	{
-		PrintStudentsSurnameZ_A(node->right, students);
-		PrintStudents(FindStudentInBase(students, 0, sizeBase, node->studentIndex));
-		PrintStudentsSurnameZ_A(node->left, students);
+		PrintStudents(FindStudentInBase(students, 0, sizeBase, currentStudent->index));
+		currentStudent = currentStudent->nextSurname;
 	}
 }
 
-void PrintStudentsVisitingIncrease(TreeVisiting* node, Student* students)
+void PrintStudentsVisitingIncrease(ListStudents* headVisiting, Student* students)
 {
-	if (node != nullptr)
+	ListStudents* currentStudent = headVisiting;
+	while (currentStudent)
 	{
-		PrintStudentsVisitingIncrease(node->left, students);
-		PrintStudents(FindStudentInBase(students, 0, sizeBase, node->studentIndex));
-		PrintStudentsVisitingIncrease(node->right, students);
+		PrintStudents(FindStudentInBase(students, 0, sizeBase, currentStudent->index));
+		currentStudent = currentStudent->nextVisiting;
 	}
 }
 
-void PrintStudentsVisitingDecrease(TreeVisiting* node, Student* students)
+void PrintStudentsVisitingDecrease(ListStudents* headVisiting, Student* students)
 {
-	if (node != nullptr)
+	ListStudents* currentStudent = headVisiting;
+	while (currentStudent)
 	{
-		PrintStudentsVisitingDecrease(node->right, students);
-		PrintStudents(FindStudentInBase(students, 0, sizeBase, node->studentIndex));
-		PrintStudentsVisitingDecrease(node->left, students);
+		PrintStudents(FindStudentInBase(students, 0, sizeBase, currentStudent->index));
+		currentStudent = currentStudent->nextVisiting;
 	}
 }
 
-void PrintAllFindStudent(TreeSurname* node, Student* students, string keySurname)
+void PrintFindStudent(ListStudents* headSurname, Student* students, string keySurname)
 {
 	bool isFound = false;
-	SearchStudent(node, students, keySurname, isFound);
+	SearchStudent(headSurname, students, keySurname, isFound);
 	if (!isFound)
 	{
 		cout << "Студенты с фамилией '" << keySurname << "' не найдены" << endl;
 	}
 }
 
-void PrintAllFindStudent(TreeVisiting* node, Student* students, int keyVisiting)
+void PrintFindStudent(ListStudents* headSurname, Student* students, int keyVisiting)
 {
 	bool isFound = false;
-	SearchStudent(node, students, keyVisiting, isFound);
+	SearchStudent(headSurname, students, keyVisiting, isFound);
 	if (!isFound)
 	{
 		cout << "Студенты с кол-вом посещений '" << keyVisiting << "' не найдены" << endl;
 	}
 }
+
+#pragma endregion
+
+#pragma region Добавление Студента
+void InsertNewStudentIncrease(Student* studentsBase, ListStudents* headSurname, ListStudents* headVisiting, Student student)
+{
+	InsertStudentIncrease(headSurname, headVisiting, student.surname, student.id, student.visiting);
+}
+
+void InsertNewStudentDecrease(Student* studentsBase, ListStudents* headSurname, ListStudents* headVisiting, Student student)
+{
+	InsertStudentDecrease(headSurname, headVisiting, student.surname, student.id, student.visiting);
+}
 #pragma endregion
 
 #pragma region Удаление информации
 
-TreeSurname* DeleteStudentTree(TreeSurname* node, string keySurname, int keyID)
+void DeleteBySurnameIncrease(ListStudents*& headSurname, ListStudents*& headVisiting, unsigned int id, string keySurname)
 {
-	if (node == nullptr)
+	ListStudents* currentSurname = headSurname;
+	ListStudents* prevSurname = nullptr;
+	while (currentSurname != nullptr)
 	{
-		return node;
-	}
-
-	if (keySurname < node->surname)
-	{
-		node->left = DeleteStudentTree(node->left, keySurname, keyID);
-	}
-	else if (keySurname > node->surname)
-	{
-		node->right = DeleteStudentTree(node->right, keySurname, keyID);
-	}
-	else if (keySurname == node->surname && node->studentIndex != keyID)
-	{
-		node->right = DeleteStudentTree(node->right, keySurname, keyID);
-	}
-	else
-	{
-		if (node->left == nullptr)
+		if (currentSurname->index == id && currentSurname->surname == keySurname)
 		{
-			TreeSurname* temp = node->right;
-			delete node;
-			return temp;
+			if (prevSurname == nullptr)
+			{
+				headSurname = currentSurname->nextSurname;
+			}
+			else
+			{
+				prevSurname->nextSurname = currentSurname->nextSurname;
+			}
+			ListStudents* currentVisiting = headVisiting;
+			ListStudents* prevVisiting = nullptr;
+			while (currentVisiting != nullptr)
+			{
+				if (currentVisiting == currentSurname)
+				{
+					if (prevVisiting == nullptr)
+					{
+						headVisiting = currentVisiting->nextVisiting;
+					}
+					else
+					{
+						prevVisiting->nextVisiting = currentVisiting->nextVisiting;
+					}
+					delete currentSurname;
+					return;
+				}
+				prevVisiting = currentVisiting;
+				currentVisiting = currentVisiting->nextVisiting;
+			}
 		}
-
-		else if (node->right == nullptr)
-		{
-			TreeSurname* temp = node->left;
-			delete node;
-			return temp;
-		}
-		else
-		{
-			TreeSurname* temp = FindMin(node->right);
-			node->surname = temp->surname;
-			node->studentIndex = temp->studentIndex;
-			node->right = DeleteStudentTree(node->right, temp->surname, temp->studentIndex);
-		}
+		prevSurname = currentSurname;
+		currentSurname = currentSurname->nextSurname;
 	}
-	return node;
 }
 
-TreeVisiting* DeleteStudentTree(TreeVisiting* node, int keyVisiting, int keyID)
+void DeleteBySurnameDecrease(ListStudents*& headSurname, ListStudents*& headVisiting, unsigned int id, string keySurname)
 {
-	if (node == nullptr)
+	ListStudents* currentSurname = headSurname;
+	ListStudents* prevSurname = nullptr;
+	while (currentSurname != nullptr)
 	{
-		return node;
-	}
+		if (currentSurname->index == id && currentSurname->surname == keySurname)
+		{
+			if (prevSurname == nullptr)
+			{
+				headSurname = currentSurname->nextSurname;
+			}
+			else
+			{
+				prevSurname->nextSurname = currentSurname->nextSurname;
+			}
+			ListStudents* currentVisiting = headVisiting;
+			ListStudents* prevVisiting = nullptr;
 
-	if (keyVisiting < node->visiting)
-	{
-		node->left = DeleteStudentTree(node->left, keyVisiting, keyID);
-	}
-	else if (keyVisiting > node->visiting)
-	{
-		node->right = DeleteStudentTree(node->right, keyVisiting, keyID);
-	}
-	else if (keyVisiting == node->visiting && node->studentIndex != keyID)
-	{
-		node->right = DeleteStudentTree(node->right, keyVisiting, keyID);
-	}
-	else
-	{
-		if (node->left == nullptr)
-		{
-			TreeVisiting* temp = node->right;
-			delete node;
-			return temp;
+			while (currentVisiting != nullptr)
+			{
+				if (currentVisiting == currentSurname)
+				{
+					if (prevVisiting == nullptr)
+					{
+						headVisiting = currentVisiting->nextVisiting;
+					}
+					else
+					{
+						prevVisiting->nextVisiting = currentVisiting->nextVisiting;
+					}
+					delete currentSurname;
+					return;
+				}
+				prevVisiting = currentVisiting;
+				currentVisiting = currentVisiting->nextVisiting;
+			}
 		}
-
-		else if (node->right == nullptr)
-		{
-			TreeVisiting* temp = node->left;
-			delete node;
-			return temp;
-		}
-		else
-		{
-			TreeVisiting* temp = FindMin(node->right);
-			node->visiting = temp->visiting;
-			node->studentIndex = temp->studentIndex;
-			node->right = DeleteStudentTree(node->right, temp->visiting, temp->studentIndex);
-		}
+		prevSurname = currentSurname;
+		currentSurname = currentSurname->nextSurname;
 	}
-	return node;
 }
 
-Student* DeleteStudent(Student* students, TreeVisiting* nodeVisiting, TreeSurname* nodeSurname)
+void DeleteByVisitingIncrease(ListStudents*& headSurname, ListStudents*& headVisiting, unsigned int id, unsigned int keyVisiting)
+{
+	ListStudents* currentVisiting = headVisiting;
+	ListStudents* prevVisiting = nullptr;
+	while (currentVisiting != nullptr)
+	{
+		if (currentVisiting->index == id && currentVisiting->visiting == keyVisiting)
+		{
+			if (prevVisiting == nullptr)
+			{
+				headVisiting = currentVisiting->nextVisiting;
+			}
+			else
+			{
+				prevVisiting->nextVisiting = currentVisiting->nextVisiting;
+			}
+			ListStudents* currentSurname = headSurname;
+			ListStudents* prevSurname = nullptr;
+
+			while (currentSurname != nullptr)
+			{
+				if (currentSurname == currentVisiting)
+				{
+					if (prevSurname == nullptr)
+					{
+						headSurname = currentSurname->nextSurname;
+					}
+					else
+					{
+						prevSurname->nextSurname = currentSurname->nextSurname;
+					}
+					delete currentVisiting;
+					return;
+				}
+				prevSurname = currentSurname;
+				currentSurname = currentSurname->nextSurname;
+			}
+		}
+		prevVisiting = currentVisiting;
+		currentVisiting = currentVisiting->nextVisiting;
+	}
+}
+
+void DeleteByVisitingDecrease(ListStudents*& headSurname, ListStudents*& headVisiting, unsigned int id, unsigned int keyVisiting)
+{
+	ListStudents* currentVisiting = headVisiting;
+	ListStudents* prevVisiting = nullptr;
+	while (currentVisiting != nullptr)
+	{
+		if (currentVisiting->index == id && currentVisiting->visiting == keyVisiting)
+		{
+			if (prevVisiting == nullptr)
+			{
+				headVisiting = currentVisiting->nextVisiting;
+			}
+			else
+			{
+				prevVisiting->nextVisiting = currentVisiting->nextVisiting;
+			}
+			ListStudents* currentSurname = headSurname;
+			ListStudents* prevSurname = nullptr;
+
+			while (currentSurname != nullptr)
+			{
+				if (currentSurname == currentVisiting)
+				{
+					if (prevSurname == nullptr)
+					{
+						headSurname = currentSurname->nextSurname;
+					}
+					else
+					{
+						prevSurname->nextSurname = currentSurname->nextSurname;
+					}
+					delete currentVisiting;
+					return;
+				}
+				prevSurname = currentSurname;
+				currentSurname = currentSurname->nextSurname;
+			}
+		}
+		prevVisiting = currentVisiting;
+		currentVisiting = currentVisiting->nextVisiting;
+	}
+}
+
+
+Student* DeleteStudentVisiting(Student* students, ListStudents*& headSurnameIncrease, ListStudents*& headVisitingIncrease, ListStudents*& headSurnameDecrease, ListStudents*& headVisitingDecrease)
 {
 	int visiting;
 	int ID;
@@ -442,7 +536,7 @@ Student* DeleteStudent(Student* students, TreeVisiting* nodeVisiting, TreeSurnam
 	string nameOfDeletedStudent;
 	cout << "Введите кол-во посещений у студента, Которого хотите исключить из ВШЭ): ";
 	cin >> visiting;//Прекращать работу или нет???
-	PrintAllFindStudent(nodeVisiting, students, visiting);
+	PrintFindStudent(headVisitingIncrease, students, visiting);
 	int action;
 	cout << "Видите ли Вы студента для удаления выше?(1-Да, 0-Нет): ";
 	cin >> action;
@@ -467,8 +561,8 @@ Student* DeleteStudent(Student* students, TreeVisiting* nodeVisiting, TreeSurnam
 		}
 		delete[] students;
 		sizeBase--;
-		nodeVisiting = DeleteStudentTree(nodeVisiting, visiting, ID);
-		nodeSurname = DeleteStudentTree(nodeSurname, surnameOfDeletedStudent, ID);
+		DeleteByVisitingIncrease(headSurnameIncrease, headVisitingIncrease, ID, visiting);
+		DeleteByVisitingDecrease(headSurnameDecrease, headVisitingDecrease, ID, visiting);
 		cout << "Студент " << surnameOfDeletedStudent << " " << nameOfDeletedStudent << " Успешно удалён" << endl;
 		return newStudents;
 	}
@@ -486,15 +580,15 @@ Student* DeleteStudent(Student* students, TreeVisiting* nodeVisiting, TreeSurnam
 	}
 }
 
-Student* DeleteStudent(Student* students, TreeSurname* nodeSurname, TreeVisiting* nodeVisiting)
+Student* DeleteStudentSurnmame(Student* students, ListStudents*& headSurnameIncrease, ListStudents*& headVisitingIncrease, ListStudents*& headSurnameDecrease, ListStudents*& headVisitingDecrease)
 {
 	string surname;
-	string nameOfDeletedStudent;
 	int ID;
-	int visitingOfDeletedStudent;
+	string surnameOfDeletedStudent;
+	string nameOfDeletedStudent;
 	cout << "Введите Фамилию студента, Которого хотите исключить из ВШЭ): ";
 	cin >> surname;//Прекращать работу или нет???
-	PrintAllFindStudent(nodeSurname, students, surname);
+	PrintFindStudent(headVisitingIncrease, students, surname);
 	int action;
 	cout << "Видите ли Вы студента для удаления выше?(1-Да, 0-Нет): ";
 	cin >> action;
@@ -513,15 +607,15 @@ Student* DeleteStudent(Student* students, TreeSurname* nodeSurname, TreeVisiting
 			}
 			else
 			{
-				visitingOfDeletedStudent = students[i].visiting;
+				surnameOfDeletedStudent = students[i].surname;
 				nameOfDeletedStudent = students[i].name;
 			}
 		}
 		delete[] students;
 		sizeBase--;
-		nodeSurname = DeleteStudentTree(nodeSurname, surname, ID);
-		nodeVisiting = DeleteStudentTree(nodeVisiting, visitingOfDeletedStudent, ID);
-		cout << "Студент " << surname << " " << nameOfDeletedStudent << " Успешно удалён" << endl;
+		DeleteBySurnameIncrease(headSurnameIncrease, headVisitingIncrease, ID, surname);
+		DeleteBySurnameDecrease(headSurnameDecrease, headVisitingDecrease, ID, surname);
+		cout << "Студент " << surnameOfDeletedStudent << " " << nameOfDeletedStudent << " Успешно удалён" << endl;
 		return newStudents;
 	}
 	case 0:
@@ -537,7 +631,15 @@ Student* DeleteStudent(Student* students, TreeSurname* nodeSurname, TreeVisiting
 	}
 	}
 }
-
+void ClearList(ListStudents*& head)
+{
+	while (head)
+	{
+		ListStudents* temp = head;
+		head = head->nextSurname;
+		delete temp;
+	}
+}
 #pragma endregion
 
 int main()
@@ -546,15 +648,21 @@ int main()
 	SetConsoleCP(1251);
 	SetConsoleOutputCP(1251);
 	Student* studentsBase = nullptr;
+	ListStudents* headSurnameIncrease = nullptr;
+	ListStudents* headVisitingIncrease = nullptr;
+	ListStudents* headSurnameDecrease = nullptr;
+	ListStudents* headVisitingDecrease = nullptr;
 	sizeBase = 9;
 
 	cout << "Использовать данные по умолчанию? (1 - Да, Другое - Нет): ";//Если время будет через switch case
 	int choice;
 	cin >> choice;
 
+
+
 	if (choice == 1)
 	{
-		studentsBase = new Student[sizeBase]
+		studentsBase = new Student[sizeBaseMax]
 		{
 			{ 1, "Зеленина", "Анастасия", "Москва", "ПИ", "23-7", 30 },
 			{ 2, "Бочкарев", "Игнат", "Нижний Новгород", "Э", "24-4", 15 },
@@ -566,17 +674,18 @@ int main()
 			{ 8, "Косвинцев", "Роман", "Пермь", "РИС", "24-1", 26 },
 			{ 9, "Кононов", "Максим", "Санкт-Петербург", "Д", "24-6", 3 },
 		};
-		id_student = 9;
+		id_student = 10;
 	}
 	else
 	{
 		cout << "Введите количество студентов: ";
 		cin >> sizeBase;//Добавить Проверку на <1
-		studentsBase = new Student[sizeBase];
+		studentsBase = new Student[sizeBaseMax];
 		InputBaseStudentsFromClava(studentsBase);
 	}
-	TreeSurname* treeSurname = BuildTreeSurname(studentsBase);
-	TreeVisiting* treeVisiting = BuildTreeVisiting(studentsBase);
+	BuildListStudentsIncrease(studentsBase, sizeBase, headSurnameIncrease, headVisitingIncrease);
+	BuildListStudentsDecrease(studentsBase, sizeBase, headSurnameDecrease, headVisitingDecrease);
+
 	bool isRunning = true;
 	int action;
 	while (isRunning)
@@ -587,10 +696,11 @@ int main()
 		cout << "3. Показать список студентов по фамилиям от Я до А\n";
 		cout << "4. Показать список студентов по посещениям Возрастание\n";
 		cout << "5. Показать список студентов по посещениям Убывание\n";
-		cout << "6. Найти студента по Фамилии\n";
-		cout << "7. Найти студента по Посещениям\n";
-		cout << "8. Удалить студента по фамилии\n";
-		cout << "9. Удалить студента по посещениям\n";
+		cout << "6. Добавить нового студента\n";
+		cout << "7. Найти студента по Фамилии\n";
+		cout << "8. Найти студента по Посещениям\n";
+		cout << "9. Удалить студента по фамилии\n";
+		cout << "10. Удалить студента по посещениям\n";
 		cout << "0. Выход\n";
 		cout << "66 - Проверка реализации Рекурсивной и Итеративной функции поиска Посещений\n";
 		cout << "77 - Проверка реализации Рекурсивной и Итеративной функции поиска Фамилии\n";
@@ -603,43 +713,44 @@ int main()
 			PrintStudents(studentsBase);
 			break;
 		case 2:
-			PrintStudentsSurnameA_Z(treeSurname, studentsBase);
+			PrintStudentsSurnameA_Z(headSurnameIncrease, studentsBase);
 			break;
 		case 3:
-			PrintStudentsSurnameZ_A(treeSurname, studentsBase);
+			PrintStudentsSurnameZ_A(headSurnameDecrease, studentsBase);
 			break;
 		case 4:
-			PrintStudentsVisitingIncrease(treeVisiting, studentsBase);
+			PrintStudentsVisitingIncrease(headVisitingIncrease, studentsBase);
 			break;
 		case 5:
-			PrintStudentsVisitingDecrease(treeVisiting, studentsBase);
+			PrintStudentsVisitingDecrease(headVisitingDecrease, studentsBase);
 			break;
 		case 6:
+			if (sizeBase + 1 > sizeBaseMax)
+			{
+				cout << "Максимальное кол-во объектов в базе данных" << endl;
+			}
+			else
+			{
+				studentsBase[sizeBase] = InputStudentFromClava();
+				sizeBase++;
+				InsertNewStudentIncrease(studentsBase, headSurnameIncrease, headVisitingIncrease, studentsBase[sizeBase - 1]);
+				InsertNewStudentDecrease(studentsBase, headSurnameDecrease, headVisitingDecrease, studentsBase[sizeBase - 1]);
+			}
+			break;
+		case 7:
 		{
 			string studentName;
 			cout << "Введите фамилию студента, которого хотите найти: ";
 			cin >> studentName;
-			PrintAllFindStudent(treeSurname, studentsBase, studentName);
-			break;
-		}
-		case 7:
-		{
-			int studentVisiting;
-			cout << "Введите кол-во посещений студентов, по которым хотите найти: ";
-			cin >> studentVisiting;
-			PrintAllFindStudent(treeVisiting, studentsBase, studentVisiting);
+			PrintFindStudent(headSurnameIncrease, studentsBase, studentName);
 			break;
 		}
 		case 8:
 		{
-			if (sizeBase < 1)
-			{
-				cout << "Нельзя удалять элементы из пустого массива";
-			}
-			else
-			{
-				studentsBase = DeleteStudent(studentsBase, treeSurname, treeVisiting);
-			}
+			int studentVisiting;
+			cout << "Введите кол-во посещений студентов, по которым хотите найти: ";
+			cin >> studentVisiting;
+			PrintFindStudent(headVisitingIncrease, studentsBase, studentVisiting);
 			break;
 		}
 		case 9:
@@ -650,28 +761,44 @@ int main()
 			}
 			else
 			{
-				studentsBase = DeleteStudent(studentsBase, treeVisiting, treeSurname);
+				studentsBase = DeleteStudentSurnmame(studentsBase, headSurnameIncrease, headVisitingIncrease, headSurnameDecrease, headVisitingDecrease);
+			}
+			break;
+		}
+		case 10:
+		{
+			if (sizeBase < 1)
+			{
+				cout << "Нельзя удалять элементы из пустого массива";
+			}
+			else
+			{
+				studentsBase = DeleteStudentVisiting(studentsBase, headSurnameIncrease, headVisitingIncrease, headSurnameDecrease, headVisitingDecrease);
 			}
 			break;
 		}
 		case 66:
 		{
-			FindStudentIterative(treeVisiting, studentsBase, 15);
+			PrintFindStudent(headSurnameIncrease, studentsBase, "Косвинцев");
 			cout << "Проверка===========================================Проверка" << endl;
-			PrintAllFindStudent(treeVisiting, studentsBase, 15);
+			IterativePrintFindStudents(headSurnameIncrease, studentsBase, "Косвинцев");
 			break;
 		}
 		case 77:
 		{
-			FindStudentIterative(treeSurname, studentsBase, "Косвинцев");
+			PrintFindStudent(headVisitingIncrease, studentsBase, 15);
 			cout << "Проверка===========================================Проверка" << endl;
-			PrintAllFindStudent(treeSurname, studentsBase, "Косвинцев");
+			IterativePrintFindStudents(headVisitingIncrease, studentsBase, 15);
 			break;
 		}
 		case 0:
 			delete[] studentsBase;
-
 			isRunning = false;
+			ClearList(headSurnameDecrease);
+			ClearList(headSurnameIncrease);
+			ClearList(headVisitingDecrease);
+			ClearList(headVisitingIncrease);
+
 			cout << "Выход из программы." << endl;
 			break;
 		default:
