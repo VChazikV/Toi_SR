@@ -221,7 +221,7 @@ void SearchStudent(ListStudents* curentStudent, Student* students, string keySur
 	SearchStudent(curentStudent->nextSurname, students, keySurnmae, isFound);
 }
 
-void SearchStudent(ListStudents* curentStudent, Student* students, int keyVisiting, bool& isFound)//Рекурсивный Поиск студентов и вывод их
+void SearchStudent(ListStudents* curentStudent, Student* students, int keyVisiting, bool& isFound)//Рекурсивный Поиск студентов по посещениям и вывод их
 {
 	if (curentStudent == nullptr)
 	{
@@ -235,7 +235,7 @@ void SearchStudent(ListStudents* curentStudent, Student* students, int keyVisiti
 	}
 	SearchStudent(curentStudent->nextVisiting, students, keyVisiting, isFound);
 }
-void IterativePrintFindStudents(ListStudents* head, Student* students, string keySurname)
+void IterativePrintFindStudents(ListStudents* head, Student* students, string keySurname)//Итеративный поиск студентов по фамилии и вывод их
 {
 	ListStudents* current = head;
 	bool found = false;
@@ -256,7 +256,7 @@ void IterativePrintFindStudents(ListStudents* head, Student* students, string ke
 }
 
 
-void IterativePrintFindStudents(ListStudents* head, Student* students, int keyVisiting)
+void IterativePrintFindStudents(ListStudents* head, Student* students, int keyVisiting)//Итеративный поиск студентов по посещениям и вывод их
 {
 	ListStudents* current = head;
 	bool found = false;
